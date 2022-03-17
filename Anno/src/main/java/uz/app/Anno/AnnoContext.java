@@ -12,20 +12,20 @@ public class AnnoContext {
     protected static final String KEY_DB_URL = "DB_URL";
     protected static final String KEY_DB_LOGIN = "DB_LOGIN";
     protected static final String KEY_DB_PASSWORD = "DB_PASSWORD";
-    protected static final String KEY_CONN_POOL_SIZE = "CONN_POOL_SIZE";
+    protected static final String KEY_CONN_POOL_SIZE = "DB_CONN_POOL_SIZE";
     protected static boolean isInitialized = false;
 
     public static PoolConnection poolConnection;
     
     public static void Init(ServletContext ctx) {
-        if(!isInitialized)
+        if(isInitialized)
             return;
         isInitialized = true;
 
-        Enumeration<String> ctxEnumeration = ctx.getAttributeNames();
+        Enumeration<String> ctxEnumeration = ctx.getInitParameterNames();
         while(ctxEnumeration.hasMoreElements()) {
             String key = ctxEnumeration.nextElement();
-            System.setProperty(key.toUpperCase(), ctx.getAttribute(key).toString());
+            System.setProperty(key.toUpperCase(), ctx.getInitParameter(key));
         }
 
         if(System.getProperty(KEY_DEBUG_MODE) == null) {

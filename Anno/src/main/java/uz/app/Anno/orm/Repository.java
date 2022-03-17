@@ -1,5 +1,6 @@
 package uz.app.Anno.orm;
 
+import uz.app.Anno.Anno;
 import uz.app.Anno.AnnoContext;
 import uz.app.AnnoDBC.PoolConnection;
 

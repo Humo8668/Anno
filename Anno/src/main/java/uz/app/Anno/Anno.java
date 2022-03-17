@@ -5,11 +5,17 @@ import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Set;
 
 import uz.app.Anno.orm.*;
+import uz.app.Anno.service.BaseService;
 import uz.app.AnnoDBC.PoolConnection;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 public class Anno {
+    static HashMap<String, BaseService> annoServices;
     static HashMap<Class<? extends BaseEntity>, EntityMetaData> EntityMDCache;
     static HashMap<String, TableMetaData> TableMDCache;
 
@@ -217,10 +223,32 @@ public class Anno {
         return emd;
     }
 
+    static void initializeServices()
+    {
+        annoServices = new HashMap<String, BaseService>();
+        System.out.print("Initializing service");
+        Reflections reflections = new Reflections("", new SubTypesScanner());
+        Set<Class<? extends BaseService>> serviceClasses = reflections.getSubTypesOf(BaseService.class);
+        for (Class<? extends BaseService> serviceClass : serviceClasses) {
+            Service serviceAnnotation = serviceClass.getAnnotation(Service.class);
+            String serviceName = "";
+            if(serviceAnnotation != null)
+                serviceName = serviceAnnotation.value();
+
+            try {
+                BaseService service = serviceClass.getConstructor().newInstance();
+                annoServices.put(serviceName, service);
+            } catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }
+    }
+
     public static void Init()
     {
         EntityMDCache = new HashMap<Class<? extends BaseEntity>, EntityMetaData>();
         TableMDCache = new HashMap<String, TableMetaData>();
+        initializeServices();
     }
 
 }

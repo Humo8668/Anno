@@ -1,13 +1,13 @@
 uz\app\Anno\orm\AnnoValidationException.class
+uz\app\Anno\Anno$EntityMetaData.class
 uz\app\Anno\orm\Schema.class
 uz\app\Anno\service\BaseService.class
 uz\app\Anno\orm\BaseEntity.class
-uz\app\Anno\orm\Anno.class
 uz\app\Anno\AnnoContext.class
 uz\app\Anno\AnnoContextAccess.class
 uz\app\Anno\orm\Repository.class
-uz\app\Anno\test\App.class
 uz\app\Anno\util\ConcurrentSet.class
+uz\app\Anno\Anno.class
 uz\app\Anno\orm\Id.class
 uz\app\Anno\service\RouteProcessingService.class
 uz\app\Anno\util\Rgx.class
@@ -16,9 +16,8 @@ uz\app\Anno\service\MainServlet.class
 uz\app\Anno\orm\Column.class
 uz\app\Anno\orm\Service.class
 uz\app\Anno\orm\Table.class
-uz\app\Anno\orm\Anno$TableMetaData.class
 uz\app\Anno\util\Pair.class
+uz\app\Anno\Anno$TableMetaData.class
 uz\app\Anno\orm\Generated.class
 uz\app\Anno\orm\RepositoryFactory.class
-uz\app\Anno\orm\Anno$EntityMetaData.class
 uz\app\Anno\util\HttpMethod.class

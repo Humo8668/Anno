@@ -9,6 +9,6 @@ String appVersion = "1.0";
         <br>
         App version: <%=appVersion%>;
         <br>
-        JSP class loader: <%= this.getClass().getClassLoader().toString()%>
+        JSP class loader: <%= this.getClass().getClassLoader().toString() %>
     </body>
 </html>

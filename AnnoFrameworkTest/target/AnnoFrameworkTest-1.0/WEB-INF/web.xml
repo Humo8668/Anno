@@ -13,8 +13,8 @@
         <param-value>123</param-value>
     </context-param>
     <context-param>
-        <param-name>DB_STRING</param-name>
-        <param-value>jdbc:postgresql://localhost/iTask</param-value>
+        <param-name>DB_URL</param-name>
+        <param-value>jdbc:postgresql://localhost:5432/iTask</param-value>
     </context-param>
     <context-param>
         <param-name>DB_CONN_POOL_SIZE</param-name>

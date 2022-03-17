@@ -37,9 +37,9 @@
     </dependency>
     
     <dependency>
-        <groupId>org.reflections</groupId>
-        <artifactId>reflections</artifactId>
-        <version>0.10.2</version>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.12</version>
     </dependency>
 
     <dependency>
