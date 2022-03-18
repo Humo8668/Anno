@@ -10,7 +10,7 @@ public class AnnoContext {
     protected static final String SETTING_FILE_URI = "";
     protected static final String KEY_DEBUG_MODE = "DEBUG_MODE";
     protected static final String KEY_DB_URL = "DB_URL";
-    protected static final String KEY_DB_LOGIN = "DB_LOGIN";
+    protected static final String KEY_DB_LOGIN = "DB_USERNAME";
     protected static final String KEY_DB_PASSWORD = "DB_PASSWORD";
     protected static final String KEY_CONN_POOL_SIZE = "DB_CONN_POOL_SIZE";
     protected static boolean isInitialized = false;
@@ -51,10 +51,10 @@ public class AnnoContext {
         return System.getProperty(KEY_DB_URL);
     }
     public static String getDBlogin() {
-        return System.getProperty(KEY_DB_URL);
+        return System.getProperty(KEY_DB_LOGIN);
     }
     public static String getDBpassword() {
-        return System.getProperty(KEY_DB_URL);
+        return System.getProperty(KEY_DB_PASSWORD);
     }
     public static PoolConnection getPoolConnection() {
         return poolConnection;

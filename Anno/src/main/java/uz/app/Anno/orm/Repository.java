@@ -13,7 +13,7 @@ import java.sql.*;
 import java.util.LinkedList;
 
 public class Repository<T extends BaseEntity> {
-    public static LinkedList<Repository> Instances;
+    public static LinkedList<Repository<? extends BaseEntity>> Instances;
 
     static {
         Instances = new LinkedList<>();
@@ -26,66 +26,58 @@ public class Repository<T extends BaseEntity> {
     protected Field idField;
     protected LinkedList<Field> entityFields;
     protected PoolConnection poolConnection;
-    private Constructor constructor = null;
+    private Constructor<T> constructor = null;
 
-    public Repository()
+    public Repository() throws Exception
     {
+        poolConnection = AnnoContext.getPoolConnection(); 
         Instances.add(this);
         entityFields = new LinkedList<>();
     }
 
-    protected void SetTargetEntity(Class<T> cl)
+    protected void SetTargetEntity(Class<T> cl) throws Exception
     {
-        ClassRef = cl;
-    }
-
-    public void Init() throws Exception
-    {
-        if(ClassRef == null)
+        if(cl == null)
             throw new Exception("Target entity not set for repository");
-
-        poolConnection = AnnoContext.getPoolConnection();
-        Constructor ctor = null;
-        try{
-            Constructor ctors[] = ClassRef.getDeclaredConstructors();
-            for (Constructor c: ctors)
-                if (c.getGenericParameterTypes().length == 0)
-                {
-                    ctor = c;
-                    break;
-                }
-
-            if(ctor == null)
-                throw new Exception("Error: constructor with no arguments not found. Class name: " + getClass().getName());
-
-            this.constructor = ctor;
-            this.constructor.setAccessible(true);
-
-            Annotation SchemaAnno = ClassRef.getAnnotation(Schema.class);
-            Annotation TableAnno = ClassRef.getAnnotation(Table.class);
-            this.idField = Anno.forEntity(ClassRef).getIdField();
-
-
-            if(SchemaAnno == null) {
-                throw new NullPointerException("Schema's name must be indicated for entity class <" + ClassRef.getName() + ">");
+        ClassRef = cl;
+        Constructor<T> ctor = null;
+        Constructor<T> ctors[] = (Constructor<T>[])ClassRef.getDeclaredConstructors();
+        for (Constructor<T> c: ctors)
+            if (c.getGenericParameterTypes().length == 0)
+            {
+                ctor = c;
+                break;
             }
-            if(TableAnno == null) {
-                throw new NullPointerException("Table's name must be indicated for entity class <" + ClassRef.getName() + ">");
-            }
-            if(this.idField == null)
-                throw new NullPointerException("Id field must be indicated for entity class <" + ClassRef.getName() + ">");
 
-            this.SCHEMA_NAME = Anno.forEntity(ClassRef).getSchemaName();
-            this.TABLE_NAME = Anno.forEntity(ClassRef).getTableName();
-            entityFields = Anno.forEntity(ClassRef).getAllFields();
+        if(ctor == null)
+            throw new Exception("Error: constructor with no arguments not found. Class name: " + getClass().getName());
 
-        } catch(Exception ex) {
-            ex.printStackTrace();
+        this.constructor = ctor;
+        this.constructor.setAccessible(true);
+
+        Annotation SchemaAnno = ClassRef.getAnnotation(Schema.class);
+        Annotation TableAnno = ClassRef.getAnnotation(Table.class);
+        this.idField = Anno.forEntity(ClassRef).getIdField();
+
+
+        if(SchemaAnno == null) {
+            throw new NullPointerException("Schema's name must be indicated for entity class <" + ClassRef.getName() + ">");
         }
+        if(TableAnno == null) {
+            throw new NullPointerException("Table's name must be indicated for entity class <" + ClassRef.getName() + ">");
+        }
+        if(this.idField == null)
+            throw new NullPointerException("Id field must be indicated for entity class <" + ClassRef.getName() + ">");
+
+        this.SCHEMA_NAME = Anno.forEntity(ClassRef).getSchemaName();
+        this.TABLE_NAME = Anno.forEntity(ClassRef).getTableName();
+        entityFields = Anno.forEntity(ClassRef).getAllFields();
     }
 
     public T[] getAll() throws SQLException
     {
+        if(ClassRef == null)
+            return null;
         Connection connection = poolConnection.getConnection();
         if(connection == null)
             throw new SQLException("Couldn't connect to database.");
@@ -123,6 +115,8 @@ public class Repository<T extends BaseEntity> {
 
     public T getById(long id) throws SQLException
     {
+        if(ClassRef == null)
+            return null;
         Connection connection = poolConnection.getConnection();
         if(connection == null)
             throw new SQLException("Couldn't connect to database.");
@@ -156,6 +150,9 @@ public class Repository<T extends BaseEntity> {
 
     public void save(T entity) throws SQLException, AnnoValidationException
     {
+        if(ClassRef == null)
+            return ;
+
         Connection connection = poolConnection.getConnection();
         if(connection == null)
             throw new SQLException("Couldn't connect to database.");
@@ -223,6 +220,8 @@ public class Repository<T extends BaseEntity> {
 
     public void delete(long id) throws SQLException
     {
+        if(ClassRef == null)
+            return ;
         Connection connection = poolConnection.getConnection();
         if(connection == null)
             throw new SQLException("Couldn't connect to database.");
@@ -244,6 +243,9 @@ public class Repository<T extends BaseEntity> {
 
     public long count() throws SQLException
     {
+        if(ClassRef == null)
+            return 0;
+
         long res = 0;
         Connection connection = poolConnection.getConnection();
         if(connection == null)

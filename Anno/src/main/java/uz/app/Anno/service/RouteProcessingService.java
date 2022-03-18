@@ -23,7 +23,9 @@ public class RouteProcessingService {
     {
         Class<? extends BaseService> serviceClass = service.getClass();
         Annotation serviceAnno = serviceClass.getAnnotation(Service.class);
-        String serviceName = ((Service) serviceAnno).value();
+        String serviceName = "";
+        if(serviceAnno != null)
+            serviceName = ((Service) serviceAnno).value();
 
         serviceName = serviceName.trim();
         serviceName = serviceName.toLowerCase();
@@ -57,7 +59,7 @@ public class RouteProcessingService {
                 path = path.substring(0, path.length()-1);
 
             String fullPath = serviceName + path;
-            System.out.println(httpMethod.toString() + " : " + fullPath);
+            //System.out.println(httpMethod.toString() + " : " + fullPath);
             RouteMapping.put(
                     new Pair<String, HttpMethod>(fullPath, httpMethod),
                     new Pair<BaseService, Method>(service, method));
@@ -78,7 +80,7 @@ public class RouteProcessingService {
         Pair<BaseService, Method> logicMethod;
         if(!RouteMapping.containsKey(routeInfo))
         {
-            System.out.println("Route " + reqPath + " didn't caught by main servlet.");
+            System.out.println("Route " + reqPath + " have not been caught by main servlet.");
             res.sendError(404);
             return;
         }

@@ -4,7 +4,6 @@ uz\app\Anno\orm\Schema.class
 uz\app\Anno\service\BaseService.class
 uz\app\Anno\orm\BaseEntity.class
 uz\app\Anno\AnnoContext.class
-uz\app\Anno\AnnoContextAccess.class
 uz\app\Anno\orm\Repository.class
 uz\app\Anno\util\ConcurrentSet.class
 uz\app\Anno\Anno.class

@@ -14,12 +14,10 @@ import uz.app.Anno.orm.*;
 import uz.app.Anno.service.BaseService;
 import uz.app.Anno.util.HttpMethod;
 
-@Service("")
 public class EchoService extends BaseService {
     UserRepository userRepo;
 
     public EchoService(){
-        userRepo = new UserRepository();
     }
 
     @Route(value = "/echo", method = HttpMethod.GET)

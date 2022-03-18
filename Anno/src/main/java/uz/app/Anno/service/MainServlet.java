@@ -28,7 +28,7 @@ public class MainServlet extends HttpServlet {
         System.out.println(HttpMethod.valueOf(HttpMethod.class, method) + " " + req.getRequestURI());
         String requestUri = MainServlet.getRequestURI(req);
         RouteProcessingService.process(requestUri, HttpMethod.valueOf(HttpMethod.class, method), req, resp);
-        resp.getOutputStream().flush();
+        resp.getWriter().flush();
     }
 
     public static String getRequestURI(HttpServletRequest req) {

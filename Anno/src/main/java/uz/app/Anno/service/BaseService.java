@@ -1,8 +1,5 @@
 package uz.app.Anno.service;
 
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -23,7 +20,7 @@ public abstract class BaseService {
 
     public void init()
     {
-        System.out.println("Service <" + this.serviceName +  "> initialized");
+        System.out.println("Service <" + this.getClass().getName() +  "> initialized");
         return;
     }
 

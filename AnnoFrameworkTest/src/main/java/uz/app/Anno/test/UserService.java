@@ -19,7 +19,12 @@ public class UserService extends BaseService {
     UserRepository userRepo;
 
     public UserService(){
-        userRepo = new UserRepository();
+        try {
+            userRepo = new UserRepository();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        
     }
 
     @Route(value = "/getall", method = HttpMethod.GET)
