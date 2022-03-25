@@ -2,11 +2,8 @@ package uz.app.Anno.test;
 
 import javax.servlet.http.*;
 
-import com.google.gson.Gson;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 

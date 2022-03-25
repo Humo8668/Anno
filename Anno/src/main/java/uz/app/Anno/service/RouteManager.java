@@ -14,7 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-public class RouteProcessingService {
+public class RouteManager {
 
     protected static HashMap<Pair<String, HttpMethod>, Pair<BaseService, Method>> RouteMapping =
             new HashMap<Pair<String, HttpMethod>, Pair<BaseService, Method>>();

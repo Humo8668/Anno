@@ -10,7 +10,7 @@ public abstract class BaseService {
     public BaseService()
     {
         try{
-            RouteProcessingService.AddService(this);
+            RouteManager.AddService(this);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

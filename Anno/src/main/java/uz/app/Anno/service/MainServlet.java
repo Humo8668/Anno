@@ -16,8 +16,8 @@ public class MainServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        AnnoContext.Init(getServletContext());
-        Anno.Init();
+        AnnoContext.Init(getServletContext()); // Reads all settings from web.xml file
+        Anno.Init(); // Runs throught all classes that extend <BaseService.class> and creates instances for them all.
         System.out.println("Main_servlet initialized");
         //this.getClass().getClassLoader().toString();
     }
@@ -27,7 +27,7 @@ public class MainServlet extends HttpServlet {
         String method = req.getMethod().trim().toUpperCase();
         System.out.println(HttpMethod.valueOf(HttpMethod.class, method) + " " + req.getRequestURI());
         String requestUri = MainServlet.getRequestURI(req);
-        RouteProcessingService.process(requestUri, HttpMethod.valueOf(HttpMethod.class, method), req, resp);
+        RouteManager.process(requestUri, HttpMethod.valueOf(HttpMethod.class, method), req, resp);
         resp.getWriter().flush();
     }
 

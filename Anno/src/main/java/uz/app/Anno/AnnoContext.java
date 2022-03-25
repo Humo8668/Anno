@@ -31,8 +31,6 @@ public class AnnoContext {
         if(System.getProperty(KEY_DEBUG_MODE) == null) {
             System.setProperty(KEY_DEBUG_MODE, "false");
         }
-            
-        poolConnection = new PoolConnection(getDBurl(), getDBlogin(), getDBpassword(), getConnPoolSize());
     }
 
     public static void setValue(String key, String value) {
@@ -57,6 +55,8 @@ public class AnnoContext {
         return System.getProperty(KEY_DB_PASSWORD);
     }
     public static PoolConnection getPoolConnection() {
+        if(poolConnection == null)
+            poolConnection = new PoolConnection(getDBurl(), getDBlogin(), getDBpassword(), getConnPoolSize());
         return poolConnection;
     }
     public static int getConnPoolSize() {

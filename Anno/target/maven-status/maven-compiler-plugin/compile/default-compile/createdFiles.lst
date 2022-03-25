@@ -8,7 +8,7 @@ uz\app\Anno\orm\Repository.class
 uz\app\Anno\util\ConcurrentSet.class
 uz\app\Anno\Anno.class
 uz\app\Anno\orm\Id.class
-uz\app\Anno\service\RouteProcessingService.class
+uz\app\Anno\service\RouteManager.class
 uz\app\Anno\util\Rgx.class
 uz\app\Anno\orm\Route.class
 uz\app\Anno\service\MainServlet.class
