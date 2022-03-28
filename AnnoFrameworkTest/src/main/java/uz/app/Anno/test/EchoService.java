@@ -12,10 +12,8 @@ import uz.app.Anno.service.BaseService;
 import uz.app.Anno.util.HttpMethod;
 
 public class EchoService extends BaseService {
-    UserRepository userRepo;
-
-    public EchoService(){
-    }
+    
+    public EchoService(){}
 
     @Route(value = "/echo", method = HttpMethod.GET)
     void getAll(HttpServletRequest req, HttpServletResponse res)
@@ -24,7 +22,7 @@ public class EchoService extends BaseService {
         PrintWriter out = res.getWriter();
         res.setContentType("application/json");
         res.setStatus(200);
-        out.print("ECHO... echo... echo...");
+        out.print("{\"message\": \"ECHO... echo... echo...\"");
         return;
     }
 }

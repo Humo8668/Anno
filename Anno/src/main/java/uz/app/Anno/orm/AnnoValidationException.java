@@ -1,11 +1,20 @@
 package uz.app.Anno.orm;
 
 public class AnnoValidationException extends Throwable {
-    public String errorCode;
+    protected String invalidFieldName;
 
-    public AnnoValidationException(String errorCode, String message)
+    public AnnoValidationException(String message)
     {
         super(message);
-        this.errorCode = errorCode;
+    }
+
+    public AnnoValidationException(String message, String invalidFieldName)
+    {
+        super(message);
+        this.invalidFieldName = invalidFieldName;
+    }
+    
+    public String getInvalidFieldName(){
+        return invalidFieldName;
     }
 }

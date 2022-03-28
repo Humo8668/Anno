@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Repository<T extends BaseEntity> {
@@ -162,15 +163,6 @@ public class Repository<T extends BaseEntity> {
 
         entity.validate();
 
-        /*for (Field field : entityFields)
-        {
-            field.setAccessible(true);
-            if(field.get(entity) != null)
-                System.out.println(field.getName() + " : " + field.get(entity).toString());
-            else
-                System.out.println(field.getName() + " : null");
-        }*/
-
         //  INSERT INTO public."Users"("login", "fullName", "email", "passwordHash", "state")
         //	VALUES ('Vasya_gq', 'Vasya Ivanov', 'v.ivanov@meyl.ru', '$2y$12$ALkeFSdcN7o.JAY/e9z7VePMLD7WWJYDAbVyknB/tG40BWP.tgnh6', 'A');
 
@@ -203,9 +195,82 @@ public class Repository<T extends BaseEntity> {
 
             SqlType = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDataType(colName);
             stmt.setObject(index, value, SqlType);
+            field.setAccessible(false);
 
             index++;
         }
+        int affectedRowsCtn = 0;
+        try {
+            affectedRowsCtn  = stmt.executeUpdate();
+            stmt.close();
+        } finally {
+            poolConnection.close(connection);
+        }
+
+        if(affectedRowsCtn == 0)
+            throw new SQLException("SQL: No rows affected");
+    }
+
+    public void update(T entity) throws SQLException, AnnoValidationException
+    {
+        if(ClassRef == null)
+            return ;
+
+        Connection connection = poolConnection.getConnection();
+        if(connection == null)
+            throw new SQLException("Couldn't connect to database.");
+
+        if(entity == null)
+            return;
+
+        entity.validate();
+        if(entity.getIdValue() == null)
+            throw new AnnoValidationException("Set value for unique(`Id` or something) field", Anno.forEntity(ClassRef).getIdColumnName());
+
+        StringBuilder SqlQuery = new StringBuilder("UPDATE ");
+        SqlQuery.append(Anno.forEntity(ClassRef).getTableFullName())
+                .append(" SET ");
+
+        for (Field field : entityFields)
+        {
+            String colName = Anno.forEntity(ClassRef).getColumnName(field);
+            if(!Anno.forTable(TABLE_NAME, SCHEMA_NAME).hasColumn(colName)
+                    || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isGenerated(colName)
+                    || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isAutoincrement(colName)) // exclude generated and autoincrement fields
+                continue;
+            SqlQuery.append("\"").append(colName).append("\"").append(" = ").append("? ,");
+        }
+        SqlQuery.deleteCharAt(SqlQuery.length() - 1);// slice the last comma
+        SqlQuery.append(" where ").append(Anno.forEntity(ClassRef).getIdColumnName()).append(" = ").append("?");
+        
+        Integer SqlType;
+        int index = 1;
+        PreparedStatement stmt = connection.prepareStatement(SqlQuery.toString());
+        for(Field field :entityFields)
+        {
+            Object value;
+            String colName = Anno.forEntity(ClassRef).getColumnName(field);
+            if(!Anno.forTable(TABLE_NAME, SCHEMA_NAME).hasColumn(colName)
+                    || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isGenerated(colName)
+                    || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isAutoincrement(colName)) // exclude generated and autoincrement fields
+                continue;
+
+            SqlType = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDataType(colName);
+            field.setAccessible(true);
+            try { value = field.get(entity); } catch (IllegalAccessException ex) { ex.printStackTrace(); value = ""; }
+            stmt.setObject(index, value, SqlType);
+            field.setAccessible(false);
+
+            index++;
+        }
+
+        // ****** Set value for id in where-clause of query ********
+        SqlType = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDataType(Anno.forEntity(ClassRef).getIdColumnName());
+        Anno.forEntity(ClassRef).getIdField().setAccessible(true);
+        stmt.setObject(index, entity.getIdValue(), SqlType);
+        Anno.forEntity(ClassRef).getIdField().setAccessible(false);
+        // *********************************************************
+
         int affectedRowsCtn = 0;
         try {
             affectedRowsCtn  = stmt.executeUpdate();
@@ -267,7 +332,75 @@ public class Repository<T extends BaseEntity> {
         return res;
     }
 
-    
+    public class WhereCondition
+    {
+        // <column> <operation> <value>
+        StringBuilder whereStr;
+        int state = 0; // 0 - initial, 1-expect column, 2-expect operation
+        LinkedList<Object> values = new LinkedList<Object>();
+
+        public WhereCondition(String colName) 
+        {
+            whereStr = new StringBuilder();
+            whereStr.append(colName).append(" ");
+            state = 2;
+        }
+        
+        public WhereCondition equal(Object value) throws RuntimeException
+        {
+            if(state != 2)
+                throw new RuntimeException("Wrong using of where-condition. Expected operation and value");
+            
+            whereStr.append(" = ").append(" ? ");
+            values.add(value);
+            return this;
+        }
+
+        public WhereCondition like(String str) throws RuntimeException
+        {
+            if(state != 2)
+                throw new RuntimeException("Wrong using of where-condition. Expected operation and value");
+            
+            whereStr.append(" like ").append(" '%'|| ? ||'%' ");
+            values.add(str);
+            return this;
+        }
+
+        public WhereCondition or(String colName) throws RuntimeException
+        {
+            if(state != 1)
+                throw new RuntimeException("Wrong using of where-condition. Expected column");
+            whereStr.append(" or ").append(colName);
+            return this;
+        }
+
+        public WhereCondition and(String colName) throws RuntimeException
+        {
+            if(state != 1)
+                throw new RuntimeException("Wrong using of where-condition. Expected column");
+            
+            whereStr.append(" and ").append(colName);
+            return this;
+        }
+
+        public T get() throws RuntimeException
+        {
+            if(state != 1)
+                throw new RuntimeException("Wrong using of where-condition. Expected column");
+            return null;
+        }
+    }
+
+    //repository.where("login").equals("asd").and("fullName").like("Asd").or("login").like("mark").get();
+    /**
+     * Represents mechanism of building SQL-where clauses and filtering rows.
+     * @param columnName Name of column for which will be applied filtering.
+     * @return Object of where-condition.
+     */
+    public WhereCondition where(String columnName)
+    {
+        return new WhereCondition(columnName);
+    }
 
     
     /**
@@ -341,6 +474,7 @@ public class Repository<T extends BaseEntity> {
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
             }
+            field.setAccessible(false);
         }
         return (T)obj;
     }

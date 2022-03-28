@@ -55,16 +55,16 @@ public class User extends BaseEntity {
     @Override
     public void validate() throws AnnoValidationException {
         if(!Rgx.isEmail(this.email))
-            throw new AnnoValidationException("14010", "Invalid email");
+            throw new AnnoValidationException("Invalid email", "email");
 
         if(this.fullName == null || this.fullName.length() == 0)
-            throw new AnnoValidationException("14020", "Invalid full name: empty");
+            throw new AnnoValidationException("Invalid full name: empty", "fullName");
 
         if(this.login == null || this.login.length() == 0)
-            throw new AnnoValidationException("14030", "Invalid login: empty");
+            throw new AnnoValidationException("Invalid login: empty", "login");
 
         if(this.passwordHash == null || this.passwordHash.length() == 0)
-            throw new AnnoValidationException("14040", "Invalid password hash: empty");
+            throw new AnnoValidationException("Invalid password hash: empty", "passwordHash");
 
         if(this.state == null || this.state.length() == 0)
             this.state = "A";
