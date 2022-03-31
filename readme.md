@@ -1,4 +1,17 @@
-#AnnoFramework
+<style>
+    code {
+        padding: 2px;
+        background-color: hsl(210,8%,95%);
+    }
+
+    pre>code{
+        display: block;
+        /*width: fit-content;*/
+    }
+</style>
+
+<h1>AnnoFramework</h1>
+
 
 Includes ORM functionality for PostgreSQL DBMS and easy url-mapping instead of Servlets(one servlet per one path). 
 
