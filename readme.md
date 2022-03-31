@@ -1,5 +1,16 @@
-<h1>AnnoFramework</h1>
+<!--<style>
+    code {
+        padding: 2px;
+        background-color: hsl(210,8%,95%);
+    }
 
+    pre>code{
+        display: block;
+        /*width: fit-content;*/
+    }
+</style>-->
+
+<h1>AnnoFramework</h1>
 
 Includes ORM functionality for PostgreSQL DBMS and easy url-mapping instead of Servlets(one servlet per one path). 
 
@@ -10,6 +21,7 @@ Requirements:
     <code>@WebServlet</code> annotation is used in framework.
 </li>
 <li>If you want to use ORM, then load some Postgres JDBC-driver class in constructor of your service. (Your services load firstly)</li>
+<li>Depends on https://github.com/Humo8668/AnnoDBC</li>
 </ul>
 
 <h2>Usage</h2>
@@ -23,7 +35,7 @@ Minimap:
 Sample of Service (url-mapping): <br>
 Create some class extending <code>BaseService</code>. Declare default constructor without arguments. <br>
 And then declare some method with arguments <code> HttpServletRequest req, HttpServletResponse res</code> in this order. <br>
-The method may return <code>void</code>, doesn't make sense. <br>
+The method may return <code>void</code>, doesn't have sense. <br>
 Annotate the method with <code>@Route</code> in which pass the route, corresponding to this method throught <code>value</code> and http-method throught <code>method</code>.<br>
 By default http-method is <code>GET</code> mtehod.
 
