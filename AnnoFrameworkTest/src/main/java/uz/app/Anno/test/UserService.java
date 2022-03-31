@@ -180,4 +180,31 @@ public class UserService extends BaseService {
             e.printStackTrace();
         }
     }
+
+    @Route(value="/getByLogin", method = HttpMethod.GET)
+    void getByLogin(HttpServletRequest req, HttpServletResponse res)
+        throws IOException, ServletException
+    {
+        PrintWriter out = res.getWriter();
+        res.setContentType("application/json");
+        res.setStatus(200);
+        User[] users;
+        String login = req.getParameter("login");
+        if(login == null)
+            login = "";
+            
+        try {
+            users = userRepo.where("login").like(login).get();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            res.sendError(500, "Error occurred: " + ex.getMessage());
+            return;
+        }
+
+        String json = gson.toJson(users);
+        res.setContentType("application/json");
+        res.setStatus(200);
+        out.print(json);
+        return;
+    }
 }

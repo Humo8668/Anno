@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="uz.app.Anno.AppTest" time="0.096" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="uz.app.Anno.AppTest" time="0.064" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="sun.desktop" value="windows"/>
     <property name="awt.toolkit" value="sun.awt.windows.WToolkit"/>
@@ -17,7 +17,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="RU"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-11.0.9\bin"/>
-    <property name="sun.java.command" value="C:\Users\YULDOS~1\AppData\Local\Temp\surefire15040682978247681919\surefirebooter16234066158715254354.jar C:\Users\YuldoshevX\AppData\Local\Temp\surefire15040682978247681919 2022-03-28T18-38-57_089-jvmRun1 surefire14597201407386089827tmp surefire_18069138605319879764tmp"/>
+    <property name="sun.java.command" value="C:\Users\YULDOS~1\AppData\Local\Temp\surefire12136808526450280867\surefirebooter2935460394336909605.jar C:\Users\YuldoshevX\AppData\Local\Temp\surefire12136808526450280867 2022-03-29T14-33-59_515-jvmRun1 surefire5544339922689702126tmp surefire_11717159387823390496tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\Projects\Sandbox\AnnoGroup\AnnoFrameworkTest\target\test-classes;D:\Projects\Sandbox\AnnoGroup\AnnoFrameworkTest\target\classes;C:\Users\YuldoshevX\.m2\repository\junit\junit\4.11\junit-4.11.jar;C:\Users\YuldoshevX\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\YuldoshevX\.m2\repository\javax\servlet\javax.servlet-api\3.1.0\javax.servlet-api-3.1.0.jar;D:\Projects\Sandbox\AnnoGroup\Anno\target\Anno-1.0.jar;C:\Users\YuldoshevX\.m2\repository\org\reflections\reflections\0.9.12\reflections-0.9.12.jar;C:\Users\YuldoshevX\.m2\repository\org\javassist\javassist\3.26.0-GA\javassist-3.26.0-GA.jar;C:\Users\YuldoshevX\.m2\repository\uz\app\AnnoDBC\AnnoDBC\1.0\AnnoDBC-1.0.jar;C:\Users\YuldoshevX\.m2\repository\uz\app\DataTable\DataTable\1.0\DataTable-1.0.jar;C:\Users\YuldoshevX\.m2\repository\com\google\code\gson\gson\2.8.6\gson-2.8.6.jar;C:\Users\YuldoshevX\.m2\repository\org\postgresql\postgresql\42.3.1\postgresql-42.3.1.jar;C:\Users\YuldoshevX\.m2\repository\org\checkerframework\checker-qual\3.5.0\checker-qual-3.5.0.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -33,7 +33,7 @@
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"/>
-    <property name="surefire.real.class.path" value="C:\Users\YULDOS~1\AppData\Local\Temp\surefire15040682978247681919\surefirebooter16234066158715254354.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\YULDOS~1\AppData\Local\Temp\surefire12136808526450280867\surefirebooter2935460394336909605.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="11.0.9+7-LTS"/>
@@ -60,5 +60,5 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="55.0"/>
   </properties>
-  <testcase name="shouldAnswerWithTrue" classname="uz.app.Anno.AppTest" time="0.001"/>
+  <testcase name="shouldAnswerWithTrue" classname="uz.app.Anno.AppTest" time="0.003"/>
 </testsuite>

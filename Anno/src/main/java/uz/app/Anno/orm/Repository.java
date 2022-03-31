@@ -278,9 +278,6 @@ public class Repository<T extends BaseEntity> {
         } finally {
             poolConnection.close(connection);
         }
-
-        if(affectedRowsCtn == 0)
-            throw new SQLException("SQL: No rows affected");
     }
 
     public void delete(long id) throws SQLException
@@ -338,11 +335,13 @@ public class Repository<T extends BaseEntity> {
         StringBuilder whereStr;
         int state = 0; // 0 - initial, 1-expect column, 2-expect operation
         LinkedList<Object> values = new LinkedList<Object>();
+        Repository<T> repository;
 
-        public WhereCondition(String colName) 
+        protected WhereCondition(String colName, Repository<T> repository) 
         {
+            this.repository = repository;
             whereStr = new StringBuilder();
-            whereStr.append(colName).append(" ");
+            whereStr.append("\"").append(colName).append("\"").append(" ");
             state = 2;
         }
         
@@ -353,6 +352,7 @@ public class Repository<T extends BaseEntity> {
             
             whereStr.append(" = ").append(" ? ");
             values.add(value);
+            state = 1;
             return this;
         }
 
@@ -363,6 +363,7 @@ public class Repository<T extends BaseEntity> {
             
             whereStr.append(" like ").append(" '%'|| ? ||'%' ");
             values.add(str);
+            state = 1;
             return this;
         }
 
@@ -370,7 +371,7 @@ public class Repository<T extends BaseEntity> {
         {
             if(state != 1)
                 throw new RuntimeException("Wrong using of where-condition. Expected column");
-            whereStr.append(" or ").append(colName);
+            whereStr.append(" or ").append("\"").append(colName).append("\"");
             return this;
         }
 
@@ -379,15 +380,65 @@ public class Repository<T extends BaseEntity> {
             if(state != 1)
                 throw new RuntimeException("Wrong using of where-condition. Expected column");
             
-            whereStr.append(" and ").append(colName);
+            whereStr.append(" and ").append("\"").append(colName).append("\"");
             return this;
         }
 
-        public T get() throws RuntimeException
+        public T[] get() throws RuntimeException, SQLException
         {
             if(state != 1)
                 throw new RuntimeException("Wrong using of where-condition. Expected column");
-            return null;
+            
+            if(ClassRef == null)
+                return null;
+            Connection connection = poolConnection.getConnection();
+            if(connection == null)
+                throw new SQLException("Couldn't connect to database.");
+    
+            StringBuilder query = new StringBuilder();
+            query.append("SELECT * FROM ")
+                    .append(Anno.forEntity(ClassRef).getTableFullName())
+                    .append(" WHERE ")/*
+                    .append(Anno.forEntity(ClassRef).getIdColumnName())
+                    .append(" = ?")*/;
+            
+            query.append(whereStr);
+
+            PreparedStatement stmt = connection.prepareStatement(query.toString());
+            int index = 1;
+            for(Object value: values)
+            {
+                stmt.setObject(index, value);
+                index++;
+            }
+
+            T[] result;
+            LinkedList<T> entities = new LinkedList<T>();
+            try {
+                ResultSet rs = stmt.executeQuery();
+                ResultSetMetaData rsmd = rs.getMetaData();
+    
+                while(rs.next())   // If row exists
+                    entities.add(repository.makeObject(rs, rsmd));
+
+                rs.close();
+                stmt.close();
+            } finally {
+                poolConnection.close(connection);
+            }
+
+            
+            int i = 0;
+            result = (T[])Array.newInstance(ClassRef, entities.size());
+            for (T e: entities) {
+                if(i > entities.size())
+                    break;
+                    result[i] = e;
+                i++;
+            }
+
+            state = 0;
+            return result;
         }
     }
 
@@ -399,7 +450,7 @@ public class Repository<T extends BaseEntity> {
      */
     public WhereCondition where(String columnName)
     {
-        return new WhereCondition(columnName);
+        return new WhereCondition(columnName, this);
     }
 
     
