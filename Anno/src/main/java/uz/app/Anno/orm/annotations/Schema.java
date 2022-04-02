@@ -1,16 +1,12 @@
-package uz.app.Anno.orm;
-
-
-import uz.app.Anno.util.HttpMethod;
+package uz.app.Anno.orm.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Route {
+public @interface Schema {
     String value();
-    HttpMethod method() default HttpMethod.GET;
 }

@@ -8,7 +8,12 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import uz.app.Anno.orm.*;
+import uz.app.Anno.orm.annotations.Column;
+import uz.app.Anno.orm.annotations.Id;
+import uz.app.Anno.orm.annotations.Schema;
+import uz.app.Anno.orm.annotations.Table;
 import uz.app.Anno.service.BaseService;
+import uz.app.Anno.service.annotations.Service;
 import uz.app.AnnoDBC.PoolConnection;
 
 import org.reflections.Reflections;
@@ -248,7 +253,11 @@ public class Anno {
     {
         EntityMDCache = new HashMap<Class<? extends BaseEntity>, EntityMetaData>();
         TableMDCache = new HashMap<String, TableMetaData>();
+        AnnoEventListener.collectListeners();
+        AnnoEventListener.triggerBeforeServicesInitializing();
         initializeServices();
+        AnnoEventListener.triggerAfterServicesInitialized();
+        AnnoEventListener.triggerAfterAnnoInitialized();
     }
 
 }

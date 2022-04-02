@@ -1,6 +1,7 @@
 package uz.app.Anno.test;
 
 import uz.app.Anno.orm.*;
+import uz.app.Anno.orm.annotations.*;
 import uz.app.Anno.util.*;
 
 @Schema("public")

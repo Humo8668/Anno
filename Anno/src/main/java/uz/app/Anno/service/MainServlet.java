@@ -18,7 +18,7 @@ public class MainServlet extends HttpServlet {
     public void init() throws ServletException {
         AnnoContext.Init(getServletContext()); // Reads all settings from web.xml file
         Anno.Init(); // Runs throught all classes that extend <BaseService.class> and creates instances for them all.
-        System.out.println("Main_servlet initialized");
+        System.out.println("Anno initialized");
         //this.getClass().getClassLoader().toString();
     }
 

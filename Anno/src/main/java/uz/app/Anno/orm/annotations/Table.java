@@ -1,4 +1,4 @@
-package uz.app.Anno.orm;
+package uz.app.Anno.orm.annotations;
 
 import java.lang.annotation.*;
 

@@ -15,17 +15,20 @@ import javax.servlet.ServletException;
 
 import uz.app.Anno.orm.*;
 import uz.app.Anno.service.BaseService;
+import uz.app.Anno.service.annotations.Route;
+import uz.app.Anno.service.annotations.Service;
 import uz.app.Anno.util.HttpMethod;
 
 @Service("User")
 public class UserService extends BaseService {
-    UserRepository userRepo;
+    RepositoryFactory repoFactory;
+    Repository<User> userRepo;
     Gson gson;
 
     public UserService(){
         try {
-            Class.forName("org.postgresql.Driver");
-            userRepo = new UserRepository();
+            repoFactory = new RepositoryFactory();
+            userRepo = (Repository<User>)repoFactory.getRepository(User.class);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

@@ -1,15 +1,11 @@
-package uz.app.Anno.orm;
+package uz.app.Anno.orm.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Annotation for defining module route.
- */
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Service {
-    String value();
+public @interface Id {
 }

@@ -2,6 +2,8 @@ package uz.app.Anno.orm;
 
 import uz.app.Anno.Anno;
 import uz.app.Anno.AnnoContext;
+import uz.app.Anno.orm.annotations.Schema;
+import uz.app.Anno.orm.annotations.Table;
 import uz.app.AnnoDBC.PoolConnection;
 
 import java.lang.annotation.Annotation;
@@ -10,7 +12,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
-import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Repository<T extends BaseEntity> {
@@ -29,7 +30,7 @@ public class Repository<T extends BaseEntity> {
     protected PoolConnection poolConnection;
     private Constructor<T> constructor = null;
 
-    public Repository() throws Exception
+    Repository() throws Exception
     {
         poolConnection = AnnoContext.getPoolConnection(); 
         Instances.add(this);

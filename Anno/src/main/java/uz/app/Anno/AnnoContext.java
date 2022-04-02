@@ -15,7 +15,7 @@ public class AnnoContext {
     protected static final String KEY_CONN_POOL_SIZE = "DB_CONN_POOL_SIZE";
     protected static boolean isInitialized = false;
 
-    public static PoolConnection poolConnection;
+    static PoolConnection poolConnection;
     
     public static void Init(ServletContext ctx) {
         if(isInitialized)
@@ -45,21 +45,23 @@ public class AnnoContext {
         return "TRUE".equals(System.getProperty(KEY_DEBUG_MODE).toUpperCase());
     }
 
-    public static String getDBurl() {
-        return System.getProperty(KEY_DB_URL);
-    }
-    public static String getDBlogin() {
-        return System.getProperty(KEY_DB_LOGIN);
-    }
-    public static String getDBpassword() {
-        return System.getProperty(KEY_DB_PASSWORD);
-    }
     public static PoolConnection getPoolConnection() {
         if(poolConnection == null)
-            poolConnection = new PoolConnection(getDBurl(), getDBlogin(), getDBpassword(), getConnPoolSize());
+            poolConnection = new PoolConnection(
+                System.getProperty(KEY_DB_URL), 
+                System.getProperty(KEY_DB_LOGIN), 
+                System.getProperty(KEY_DB_PASSWORD), 
+                Integer.parseInt(System.getProperty(KEY_CONN_POOL_SIZE))
+            );
+
         return poolConnection;
     }
-    public static int getConnPoolSize() {
-        return Integer.parseInt(System.getProperty(KEY_CONN_POOL_SIZE));
+    public static void setPoolConnection(PoolConnection poolConnection) throws NullPointerException {
+        if(poolConnection == null){
+            throw new NullPointerException("PoolConnection is null");
+        }
+        AnnoContext.poolConnection = poolConnection;
     }
+
+    
 }
