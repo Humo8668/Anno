@@ -22,6 +22,8 @@ public class User extends BaseEntity {
     @Column("state")
     private String state;
 
+    private String age;
+
     public User() { }
 
     public User(int id, String login, String fullName, String email, String passwordHash, String state) {

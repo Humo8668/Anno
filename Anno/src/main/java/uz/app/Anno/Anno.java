@@ -1,5 +1,6 @@
 package uz.app.Anno;
 
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Collection;
@@ -14,7 +15,7 @@ import uz.app.Anno.orm.annotations.Schema;
 import uz.app.Anno.orm.annotations.Table;
 import uz.app.Anno.service.BaseService;
 import uz.app.Anno.service.annotations.Service;
-import uz.app.AnnoDBC.PoolConnection;
+import uz.app.Anno.util.IPoolConnection;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -50,7 +51,7 @@ public class Anno {
             DatabaseMetaData metadata;
             ResultSet rs;
             try {
-                PoolConnection poolConnection = AnnoContext.getPoolConnection();
+                IPoolConnection poolConnection = AnnoContext.getPoolConnection();
                 conn = poolConnection.getConnection();
                 metadata = conn.getMetaData();
                 rs = metadata.getColumns(null, SCHEMA_NAME, TABLE_NAME, "%");
@@ -142,12 +143,39 @@ public class Anno {
             return res;
         }
 
+        public LinkedList<Field> getColumnAnnotatedFields(){
+            LinkedList<Field> res = new LinkedList<Field>();
+            Field[] fields = ENTITY_CLASS.getDeclaredFields();
+            for(int i = 0; i < fields.length; i++)
+            {
+                if(isAnnotatedAsColumn(fields[i]))
+                    res.add(fields[i]);
+            }
+            return res;
+        }
+
+        public boolean isAnnotatedAsColumn(Field field) {
+            if(field == null)
+                return false;
+
+            Column col = field.getAnnotation(Column.class);
+            if(col != null)
+                return true;
+            else 
+                return false;
+        }
+
         public String getColumnName(Field field)
+            throws AnnoNotAnnotatedField
         {
             if(field == null)
                 return "";
 
-            return field.getAnnotation(Column.class).value();
+            Column col = field.getAnnotation(Column.class);
+            if(col != null)
+                return field.getAnnotation(Column.class).value();
+            else
+                throw new AnnoNotAnnotatedField("Field is not annotated as column: " + field.getDeclaringClass().getName() + "." +field.getName(), field);
         }
 
         public Field getFieldByColumnName(String columnName)
@@ -179,7 +207,7 @@ public class Anno {
             return res;
         }
 
-        public String getIdColumnName()
+        public String getIdColumnName() throws AnnoNotAnnotatedField
         {
             return getColumnName(getIdField());
         }
@@ -231,15 +259,14 @@ public class Anno {
     static void initializeServices()
     {
         annoServices = new HashMap<String, BaseService>();
-        System.out.print("Initializing service");
         Reflections reflections = new Reflections("", new SubTypesScanner());
         Set<Class<? extends BaseService>> serviceClasses = reflections.getSubTypesOf(BaseService.class);
+        
         for (Class<? extends BaseService> serviceClass : serviceClasses) {
             Service serviceAnnotation = serviceClass.getAnnotation(Service.class);
             String serviceName = "";
             if(serviceAnnotation != null)
                 serviceName = serviceAnnotation.value();
-
             try {
                 BaseService service = serviceClass.getConstructor().newInstance();
                 annoServices.put(serviceName, service);
@@ -253,9 +280,28 @@ public class Anno {
     {
         EntityMDCache = new HashMap<Class<? extends BaseEntity>, EntityMetaData>();
         TableMDCache = new HashMap<String, TableMetaData>();
+        long start, end;
+        PrintStream console = System.out;
+        
+        console.println("Collecting Anno event listeners...");
+        start = System.currentTimeMillis();
         AnnoEventListener.collectListeners();
+        end = System.currentTimeMillis();
+        console.println("Collected Anno event listeners in " + (end - start) + " ms.");
+
+        console.println("Broadcasting <beforeSeviceInitializing> event...");
+        start = System.currentTimeMillis();
         AnnoEventListener.triggerBeforeServicesInitializing();
+        end = System.currentTimeMillis();
+        console.println("Event <beforeSeviceInitializing> broadcasted in " + (end - start) + " ms.");
+
+        
+        console.println("Scanning and initializing services...");
+        start = System.currentTimeMillis();
         initializeServices();
+        end = System.currentTimeMillis();
+        console.println("Services scanned and initialized in " + (end - start) + " ms.");
+
         AnnoEventListener.triggerAfterServicesInitialized();
         AnnoEventListener.triggerAfterAnnoInitialized();
     }

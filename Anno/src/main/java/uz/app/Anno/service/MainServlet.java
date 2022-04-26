@@ -14,8 +14,24 @@ import java.io.IOException;
 @WebServlet(name="AnnoMainServlet", value = "/*")
 public class MainServlet extends HttpServlet {
 
+    public void printASCIIArt() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append( "                                 \n");
+        sb.append( "    /\\                          \n");
+        sb.append( "   /  \\   _ __  _ __   ___      \n");
+        sb.append( "  / /\\ \\ | '_ \\| '_ \\ / _ \\ \n");
+        sb.append( " / ____ \\| | | | | | | (_) |    \n");
+        sb.append( "/_/    \\_\\_| |_|_| |_|\\___/   \n");
+        sb.append( "                                 \n");
+        sb.append( "                                 \n");
+        
+        System.out.println(sb.toString());
+    }
+
     @Override
     public void init() throws ServletException {
+        printASCIIArt();
         AnnoContext.Init(getServletContext()); // Reads all settings from web.xml file
         Anno.Init(); // Runs throught all classes that extend <BaseService.class> and creates instances for them all.
         System.out.println("Anno initialized");

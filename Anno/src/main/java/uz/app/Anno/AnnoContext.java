@@ -4,7 +4,8 @@ import java.util.Enumeration;
 
 import javax.servlet.ServletContext;
 
-import uz.app.AnnoDBC.PoolConnection;
+import uz.app.Anno.util.AnnoPoolConnection;
+import uz.app.Anno.util.IPoolConnection;
 
 public class AnnoContext {
     protected static final String SETTING_FILE_URI = "";
@@ -15,7 +16,7 @@ public class AnnoContext {
     protected static final String KEY_CONN_POOL_SIZE = "DB_CONN_POOL_SIZE";
     protected static boolean isInitialized = false;
 
-    static PoolConnection poolConnection;
+    static IPoolConnection poolConnection;
     
     public static void Init(ServletContext ctx) {
         if(isInitialized)
@@ -45,9 +46,9 @@ public class AnnoContext {
         return "TRUE".equals(System.getProperty(KEY_DEBUG_MODE).toUpperCase());
     }
 
-    public static PoolConnection getPoolConnection() {
+    public static IPoolConnection getPoolConnection() {
         if(poolConnection == null)
-            poolConnection = new PoolConnection(
+            poolConnection = new AnnoPoolConnection(
                 System.getProperty(KEY_DB_URL), 
                 System.getProperty(KEY_DB_LOGIN), 
                 System.getProperty(KEY_DB_PASSWORD), 
@@ -56,7 +57,7 @@ public class AnnoContext {
 
         return poolConnection;
     }
-    public static void setPoolConnection(PoolConnection poolConnection) throws NullPointerException {
+    public static void setPoolConnection(IPoolConnection poolConnection) throws NullPointerException {
         if(poolConnection == null){
             throw new NullPointerException("PoolConnection is null");
         }

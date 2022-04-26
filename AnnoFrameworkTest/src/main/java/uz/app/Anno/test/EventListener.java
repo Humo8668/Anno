@@ -2,7 +2,7 @@ package uz.app.Anno.test;
 
 import uz.app.Anno.AnnoContext;
 import uz.app.Anno.AnnoEventListener;
-import uz.app.AnnoDBC.PoolConnection;
+import uz.app.Anno.util.AnnoPoolConnection;
 
 public class EventListener extends AnnoEventListener {
     @Override
@@ -15,7 +15,7 @@ public class EventListener extends AnnoEventListener {
     protected void BeforeServicesInitializing() {
         try {
             Class.forName("org.postgresql.Driver");
-            AnnoContext.setPoolConnection(new PoolConnection(
+            AnnoContext.setPoolConnection(new AnnoPoolConnection(
                 System.getProperty("DB_URL"), 
                 System.getProperty("DB_USERNAME"), 
                 System.getProperty("DB_PASSWORD"), 

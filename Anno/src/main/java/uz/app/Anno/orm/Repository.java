@@ -4,15 +4,18 @@ import uz.app.Anno.Anno;
 import uz.app.Anno.AnnoContext;
 import uz.app.Anno.orm.annotations.Schema;
 import uz.app.Anno.orm.annotations.Table;
-import uz.app.AnnoDBC.PoolConnection;
+import uz.app.Anno.util.IPoolConnection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.security.Timestamp;
 import java.sql.*;
 import java.util.LinkedList;
+
+import javax.management.ValueExp;
 
 public class Repository<T extends BaseEntity> {
     public static LinkedList<Repository<? extends BaseEntity>> Instances;
@@ -27,7 +30,8 @@ public class Repository<T extends BaseEntity> {
     protected Class<T> ClassRef = null;
     protected Field idField;
     protected LinkedList<Field> entityFields;
-    protected PoolConnection poolConnection;
+    protected LinkedList<Field> entityColumns;
+    protected IPoolConnection poolConnection;
     private Constructor<T> constructor = null;
 
     Repository() throws Exception
@@ -35,6 +39,7 @@ public class Repository<T extends BaseEntity> {
         poolConnection = AnnoContext.getPoolConnection(); 
         Instances.add(this);
         entityFields = new LinkedList<>();
+        entityColumns = new LinkedList<>();
     }
 
     protected void SetTargetEntity(Class<T> cl) throws Exception
@@ -74,6 +79,7 @@ public class Repository<T extends BaseEntity> {
         this.SCHEMA_NAME = Anno.forEntity(ClassRef).getSchemaName();
         this.TABLE_NAME = Anno.forEntity(ClassRef).getTableName();
         entityFields = Anno.forEntity(ClassRef).getAllFields();
+        entityColumns = Anno.forEntity(ClassRef).getColumnAnnotatedFields();
     }
 
     public T[] getAll() throws SQLException
@@ -167,12 +173,12 @@ public class Repository<T extends BaseEntity> {
         //  INSERT INTO public."Users"("login", "fullName", "email", "passwordHash", "state")
         //	VALUES ('Vasya_gq', 'Vasya Ivanov', 'v.ivanov@meyl.ru', '$2y$12$ALkeFSdcN7o.JAY/e9z7VePMLD7WWJYDAbVyknB/tG40BWP.tgnh6', 'A');
 
-        String fields = getEntityFields();
+        String columns = getEntityColumns();
         String valuesPlaceholder = getEntityValuePlaceholders();
         StringBuilder SqlQuery = new StringBuilder("INSERT INTO ");
         SqlQuery.append(Anno.forEntity(ClassRef).getTableFullName())
                 .append(" (")
-                .append(fields)
+                .append(columns)
                 .append(") VALUES (")
                 .append(valuesPlaceholder)
                 .append(");");
@@ -182,8 +188,9 @@ public class Repository<T extends BaseEntity> {
 
         Integer SqlType;
         int index = 1;
-        for (Field field : entityFields)
+        for (Field field : entityColumns)
         {
+
             String colName = Anno.forEntity(ClassRef).getColumnName(field);
             if(!Anno.forTable(TABLE_NAME, SCHEMA_NAME).hasColumn(colName)
                     || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isGenerated(colName)
@@ -357,6 +364,26 @@ public class Repository<T extends BaseEntity> {
             return this;
         }
 
+        public WhereCondition greater(Object value){
+            if(state != 2)
+                throw new RuntimeException("Wrong using of where-condition. Expected operation and value");
+            
+            whereStr.append(" > ").append(" ? ");
+            values.add(value);
+            state = 1;
+            return this;
+        }
+
+        public WhereCondition less(Object value){
+            if(state != 2)
+                throw new RuntimeException("Wrong using of where-condition. Expected operation and value");
+            
+            whereStr.append(" < ").append(" ? ");
+            values.add(value);
+            state = 1;
+            return this;
+        }
+
         public WhereCondition like(String str) throws RuntimeException
         {
             if(state != 2)
@@ -373,6 +400,7 @@ public class Repository<T extends BaseEntity> {
             if(state != 1)
                 throw new RuntimeException("Wrong using of where-condition. Expected column");
             whereStr.append(" or ").append("\"").append(colName).append("\"");
+            state = 2;
             return this;
         }
 
@@ -382,6 +410,7 @@ public class Repository<T extends BaseEntity> {
                 throw new RuntimeException("Wrong using of where-condition. Expected column");
             
             whereStr.append(" and ").append("\"").append(colName).append("\"");
+            state = 2;
             return this;
         }
 
@@ -409,7 +438,10 @@ public class Repository<T extends BaseEntity> {
             int index = 1;
             for(Object value: values)
             {
-                stmt.setObject(index, value);
+                if(value instanceof java.util.Date) // because of some error of JDBC
+                    stmt.setObject(index, value, java.sql.Types.DATE);
+                else
+                    stmt.setObject(index, value);//, SqlType
                 index++;
             }
 
@@ -484,7 +516,9 @@ public class Repository<T extends BaseEntity> {
             field.setAccessible(true);
 
             try {
-                switch (colType) {
+                field.set(obj, rs.getObject(colIndex));
+                
+                /*switch (colType) {
                     case Types.VARCHAR:
                     case Types.LONGVARCHAR:
                     case Types.CHAR:
@@ -494,7 +528,7 @@ public class Repository<T extends BaseEntity> {
                         break;
                     case Types.INTEGER:
                     case Types.NUMERIC:
-                        field.setInt(obj, rs.getInt(colIndex));
+                        field.set(obj, rs.getBigDecimal(colIndex));
                         break;
                     case Types.BIGINT:
                         field.setLong(obj, rs.getLong(colIndex));
@@ -522,7 +556,7 @@ public class Repository<T extends BaseEntity> {
                     default:
                         field.set(obj, rs.getObject(colIndex));
                         break;
-                }
+                }*/
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
             }
@@ -535,12 +569,14 @@ public class Repository<T extends BaseEntity> {
      * Writes comma separated column names
      * @return Comma separated column names
      */
-    protected String getEntityFields()
+    protected String getEntityColumns()
     {
         StringBuilder fieldsList = new StringBuilder();
-        for (Field field: entityFields)
+        for (Field field: entityColumns)
         {
-            String colName = Anno.forEntity(ClassRef).getColumnName(field);
+            String colName;
+            colName = Anno.forEntity(ClassRef).getColumnName(field);
+
             if(!Anno.forTable(TABLE_NAME, SCHEMA_NAME).hasColumn(colName)
                     || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isGenerated(colName)
                     || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isAutoincrement(colName)) // exclude generated and autoincrement fields
@@ -559,7 +595,13 @@ public class Repository<T extends BaseEntity> {
         StringBuilder strBld = new StringBuilder();
         for (Field field : entityFields)
         {
-            String colName = Anno.forEntity(ClassRef).getColumnName(field);
+            
+            String colName;
+            if(Anno.forEntity(ClassRef).isAnnotatedAsColumn(field)) {
+                colName = Anno.forEntity(ClassRef).getColumnName(field);
+            } else {
+                continue;
+            }
             if(!Anno.forTable(TABLE_NAME, SCHEMA_NAME).hasColumn(colName)
                     || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isGenerated(colName)
                     || Anno.forTable(TABLE_NAME, SCHEMA_NAME).isAutoincrement(colName)) // exclude generated and autoincrement fields
