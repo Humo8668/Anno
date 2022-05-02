@@ -35,6 +35,7 @@ public class Anno {
         LinkedList<String> NullableColumns;
         LinkedList<String> GeneratedColumns;
         LinkedList<String> AutoincrementColumns;
+        HashMap<String, String> DefaultValues;
 
 
         public TableMetaData(String tableName, String schemaName)
@@ -46,6 +47,7 @@ public class Anno {
             GeneratedColumns = new LinkedList<String>();
             AutoincrementColumns = new LinkedList<String>();
             ColumnType = new HashMap<String, Integer>();
+            DefaultValues = new HashMap<>();
 
             Connection conn = null;
             DatabaseMetaData metadata;
@@ -67,6 +69,9 @@ public class Anno {
 
                     if(rs.getString("IS_NULLABLE").equals("YES"))
                         NullableColumns.add(colName);
+
+                    if(rs.getString("COLUMN_DEF") != null)
+                        DefaultValues.put(colName, rs.getString("COLUMN_DEF"));
 
                     ColumnType.put(colName, rs.getInt("DATA_TYPE"));
                 }
@@ -121,6 +126,10 @@ public class Anno {
         public Collection<String> getColumnsNames()
         {
             return Naming.values();
+        }
+
+        public String getDefaultValue(String column) {
+            return DefaultValues.get(column);
         }
     }
 

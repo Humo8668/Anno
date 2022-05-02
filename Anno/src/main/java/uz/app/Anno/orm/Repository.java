@@ -27,7 +27,7 @@ public class Repository<T extends BaseEntity> {
     protected String TABLE_NAME = "";
     protected String SCHEMA_NAME = "public";
 
-    protected Class<T> ClassRef = null;
+    protected Class<T> ClassRef = null; // class of entity behind of this repository works
     protected Field idField;
     protected LinkedList<Field> entityFields;
     protected LinkedList<Field> entityColumns;
@@ -80,6 +80,19 @@ public class Repository<T extends BaseEntity> {
         this.TABLE_NAME = Anno.forEntity(ClassRef).getTableName();
         entityFields = Anno.forEntity(ClassRef).getAllFields();
         entityColumns = Anno.forEntity(ClassRef).getColumnAnnotatedFields();
+    }
+
+    protected static Object selectFromDumb(Connection conn, String expression) throws SQLException {
+        Object result;
+        PreparedStatement stmt = conn.prepareStatement("SELECT " + expression);
+        ResultSet rs = stmt.executeQuery();
+        if(rs.next()) {
+            result = rs.getObject(1);
+        } else {
+            result = null;
+        }
+
+        return result;
     }
 
     public T[] getAll() throws SQLException
@@ -199,8 +212,10 @@ public class Repository<T extends BaseEntity> {
 
             field.setAccessible(true);
             Object value;
+            String defaultValue = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDefaultValue(colName);
             try { value = field.get(entity); } catch (IllegalAccessException ex) { ex.printStackTrace(); value = ""; }
-
+            if(value == null || "".equals(value))
+                value = Repository.selectFromDumb(connection, defaultValue);
             SqlType = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDataType(colName);
             stmt.setObject(index, value, SqlType);
             field.setAccessible(false);
@@ -239,7 +254,7 @@ public class Repository<T extends BaseEntity> {
         SqlQuery.append(Anno.forEntity(ClassRef).getTableFullName())
                 .append(" SET ");
 
-        for (Field field : entityFields)
+        for (Field field : entityColumns)
         {
             String colName = Anno.forEntity(ClassRef).getColumnName(field);
             if(!Anno.forTable(TABLE_NAME, SCHEMA_NAME).hasColumn(colName)
@@ -254,7 +269,7 @@ public class Repository<T extends BaseEntity> {
         Integer SqlType;
         int index = 1;
         PreparedStatement stmt = connection.prepareStatement(SqlQuery.toString());
-        for(Field field :entityFields)
+        for(Field field :entityColumns)
         {
             Object value;
             String colName = Anno.forEntity(ClassRef).getColumnName(field);
@@ -265,7 +280,10 @@ public class Repository<T extends BaseEntity> {
 
             SqlType = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDataType(colName);
             field.setAccessible(true);
+            String defaultValue = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDefaultValue(colName);
             try { value = field.get(entity); } catch (IllegalAccessException ex) { ex.printStackTrace(); value = ""; }
+            if(value == null || "".equals(value))
+                value = Repository.selectFromDumb(connection, defaultValue);
             stmt.setObject(index, value, SqlType);
             field.setAccessible(false);
 
@@ -414,7 +432,7 @@ public class Repository<T extends BaseEntity> {
             return this;
         }
 
-        public T[] get() throws RuntimeException, SQLException
+        public T[] get() throws SQLException
         {
             if(state != 1)
                 throw new RuntimeException("Wrong using of where-condition. Expected column");
@@ -470,6 +488,56 @@ public class Repository<T extends BaseEntity> {
                 i++;
             }
 
+            state = 0;
+            return result;
+        }
+
+        public int getCount() throws SQLException {
+            if(state != 1)
+                throw new RuntimeException("Wrong using of where-condition. Expected column");
+            
+            if(ClassRef == null)
+                throw new RuntimeException("Entity is not defined for this repository!");
+            Connection connection = poolConnection.getConnection();
+            if(connection == null)
+                throw new SQLException("Couldn't connect to database.");
+
+            int result;
+            StringBuilder query = new StringBuilder();
+            query.append("SELECT count(*) FROM ")
+                    .append(Anno.forEntity(ClassRef).getTableFullName())
+                    .append(" WHERE ")/*
+                    .append(Anno.forEntity(ClassRef).getIdColumnName())
+                    .append(" = ?")*/;
+            
+            query.append(whereStr);
+
+            PreparedStatement stmt = connection.prepareStatement(query.toString());
+            int index = 1;
+            for(Object value: values)
+            {
+                if(value instanceof java.util.Date) // because of some error of JDBC
+                    stmt.setObject(index, value, java.sql.Types.DATE);
+                else
+                    stmt.setObject(index, value);//, SqlType
+                index++;
+            }
+
+            try {
+                ResultSet rs = stmt.executeQuery();
+
+                if(rs.next()) {
+                    result = rs.getInt(1);
+                } else {
+                    throw new RuntimeException("No data received from database!");
+                }
+                rs.close();
+                stmt.close();
+            } finally {
+                poolConnection.close(connection);
+            }
+
+            
             state = 0;
             return result;
         }
@@ -590,10 +658,14 @@ public class Repository<T extends BaseEntity> {
         return fieldsList.substring(0, fieldsList.length()-1);  // returning without last comma
     }
 
+    /**
+     * Returns string of sql insert-script's value placeholder
+     * @return
+     */
     protected String getEntityValuePlaceholders()
     {
         StringBuilder strBld = new StringBuilder();
-        for (Field field : entityFields)
+        for (Field field : entityColumns)
         {
             
             String colName;
