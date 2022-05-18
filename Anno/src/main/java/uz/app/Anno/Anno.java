@@ -2,6 +2,7 @@ package uz.app.Anno;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import org.reflections.scanners.SubTypesScanner;
 
 public class Anno {
     static HashMap<String, BaseService> annoServices;
-    static HashMap<Class<? extends BaseEntity>, EntityMetaData> EntityMDCache;
+    static HashMap<Class<? extends IEntity>, EntityMetaData> EntityMDCache;
     static HashMap<String, TableMetaData> TableMDCache;
 
     public static class TableMetaData
@@ -135,10 +136,26 @@ public class Anno {
 
     public static class EntityMetaData
     {
-        Class<? extends BaseEntity> ENTITY_CLASS;
-        public EntityMetaData(Class<? extends BaseEntity> entityClass)
+        Class<? extends IEntity> ENTITY_CLASS;
+        public EntityMetaData(Class<? extends IEntity> entityClass)
         {
             this.ENTITY_CLASS = entityClass;
+        }
+
+        public Object getIdValue(IEntity entity)
+        {
+            Field idField = getIdField();
+            idField.setAccessible(true);
+            Object result;
+            try {
+                result = idField.get(entity);
+            } catch (IllegalArgumentException e) {
+                return null;
+            } catch (IllegalAccessException e) {
+                return null;
+            }
+            idField.setAccessible(false);
+            return result;
         }
 
         public LinkedList<Field> getAllFields()
@@ -235,6 +252,37 @@ public class Anno {
         {
             return this.ENTITY_CLASS.getAnnotation(Schema.class).value();
         }
+
+        public Method getSetter(Field field) {
+            Method result = null;
+            Method[] methods = ENTITY_CLASS.getDeclaredMethods();
+
+            
+            for (Method method : methods) {
+                if(method.getName().equalsIgnoreCase("set" + field.getName())) {
+                    result = method;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        public Method getGetter(Field field) {
+            Method result = null;
+            Method[] methods = ENTITY_CLASS.getDeclaredMethods();
+
+            
+            for (Method method : methods) {
+                if(method.getName().equalsIgnoreCase("get" + field.getName())) {
+                    result = method;
+                    break;
+                }
+                    
+            }
+
+            return result;
+        }
     }
 
     public static TableMetaData forTable(String tableName)
@@ -254,7 +302,7 @@ public class Anno {
         return tmd;
     }
 
-    public static EntityMetaData forEntity(Class<? extends BaseEntity> entityClass)
+    public static EntityMetaData forEntity(Class<? extends IEntity> entityClass)
     {
         if(EntityMDCache.keySet().contains(entityClass))
             return EntityMDCache.get(entityClass);
@@ -287,7 +335,7 @@ public class Anno {
 
     public static void Init()
     {
-        EntityMDCache = new HashMap<Class<? extends BaseEntity>, EntityMetaData>();
+        EntityMDCache = new HashMap<Class<? extends IEntity>, EntityMetaData>();
         TableMDCache = new HashMap<String, TableMetaData>();
         long start, end;
         PrintStream console = System.out;

@@ -13,6 +13,7 @@ public abstract class BaseService {
             RouteManager.AddService(this);
         } catch(Exception ex) {
             ex.printStackTrace();
+            return;
         }
         
         init();

@@ -6,7 +6,7 @@ import uz.app.Anno.util.*;
 
 @Schema("public")
 @Table("Users")
-public class User extends BaseEntity {
+public class User implements IEntity {
     @Id
     @Generated
     @Column("id")

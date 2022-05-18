@@ -59,6 +59,9 @@ public class RouteManager {
                 path = path.substring(0, path.length()-1);
 
             String fullPath = serviceName + path;
+            if(RouteMapping.containsKey(new Pair<String, HttpMethod>(fullPath, httpMethod))) {
+                throw new Exception("Method for such route path is already registered. path: " + fullPath + "; method: " + httpMethod.toString());
+            }
             //System.out.println(httpMethod.toString() + " : " + fullPath);
             RouteMapping.put(
                     new Pair<String, HttpMethod>(fullPath, httpMethod),

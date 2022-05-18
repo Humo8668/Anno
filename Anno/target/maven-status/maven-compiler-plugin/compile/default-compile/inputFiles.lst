@@ -6,6 +6,7 @@ D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\AnnoContext.j
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\util\AnnoPoolConnection.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\service\annotations\Service.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\annotations\Column.java
+D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\IEntity.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\AnnoValidationException.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\util\Pair.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\annotations\Schema.java
@@ -16,7 +17,6 @@ D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\util\Concurre
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\service\RouteManager.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\service\BaseService.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\AnnoEventListener.java
-D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\BaseEntity.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\AnnoNotAnnotatedField.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\orm\RepositoryFactory.java
 D:\Projects\Home\AnnoFramework\Anno\Anno\src\main\java\uz\app\Anno\Anno.java

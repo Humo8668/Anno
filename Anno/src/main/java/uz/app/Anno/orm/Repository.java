@@ -11,14 +11,12 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.security.Timestamp;
+import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.LinkedList;
 
-import javax.management.ValueExp;
-
-public class Repository<T extends BaseEntity> {
-    public static LinkedList<Repository<? extends BaseEntity>> Instances;
+public class Repository<T extends IEntity> {
+    public static LinkedList<Repository<? extends IEntity>> Instances;
 
     static {
         Instances = new LinkedList<>();
@@ -247,7 +245,7 @@ public class Repository<T extends BaseEntity> {
             return;
 
         entity.validate();
-        if(entity.getIdValue() == null)
+        if(Anno.forEntity(entity.getClass()).getIdValue(entity) == null)
             throw new AnnoValidationException("Set value for unique(`Id` or something) field", Anno.forEntity(ClassRef).getIdColumnName());
 
         StringBuilder SqlQuery = new StringBuilder("UPDATE ");
@@ -293,7 +291,7 @@ public class Repository<T extends BaseEntity> {
         // ****** Set value for id in where-clause of query ********
         SqlType = Anno.forTable(TABLE_NAME, SCHEMA_NAME).getDataType(Anno.forEntity(ClassRef).getIdColumnName());
         Anno.forEntity(ClassRef).getIdField().setAccessible(true);
-        stmt.setObject(index, entity.getIdValue(), SqlType);
+        stmt.setObject(index, Anno.forEntity(entity.getClass()).getIdValue(entity), SqlType);
         Anno.forEntity(ClassRef).getIdField().setAccessible(false);
         // *********************************************************
 
@@ -541,6 +539,53 @@ public class Repository<T extends BaseEntity> {
             state = 0;
             return result;
         }
+
+        public T getFirst() throws SQLException
+        {
+            if(state != 1)
+                throw new RuntimeException("Wrong using of where-condition. Expected column");
+            
+            if(ClassRef == null)
+                return null;
+            Connection connection = poolConnection.getConnection();
+            if(connection == null)
+                throw new SQLException("Couldn't connect to database.");
+    
+            StringBuilder query = new StringBuilder();
+            query.append("SELECT * FROM ")
+                    .append(Anno.forEntity(ClassRef).getTableFullName())
+                    .append(" WHERE ")/*
+                    .append(Anno.forEntity(ClassRef).getIdColumnName())
+                    .append(" = ?")*/;
+            
+            query.append(whereStr);
+
+            PreparedStatement stmt = connection.prepareStatement(query.toString());
+            int index = 1;
+            for(Object value: values)
+            {
+                if(value instanceof java.util.Date) // because of some error of JDBC
+                    stmt.setObject(index, value, java.sql.Types.DATE);
+                else
+                    stmt.setObject(index, value);//, SqlType
+                index++;
+            }
+
+            T result = null;
+            try {
+                ResultSet rs = stmt.executeQuery();
+                ResultSetMetaData rsmd = rs.getMetaData();
+                
+                if(rs.next()) {
+                    result = repository.makeObject(rs, rsmd);
+                }
+                rs.close();
+                stmt.close();
+            } finally {
+                poolConnection.close(connection);
+            }
+            return result;
+        }
     }
 
     //repository.where("login").equals("asd").and("fullName").like("Asd").or("login").like("mark").get();
@@ -584,7 +629,31 @@ public class Repository<T extends BaseEntity> {
             field.setAccessible(true);
 
             try {
-                field.set(obj, rs.getObject(colIndex));
+                
+                /*if(field.getType().equals(rs.getObject(colIndex).getClass()))
+                    field.set(obj, rs.getObject(colIndex));*/
+                try {
+                    field.set(obj, rs.getObject(colIndex));
+                } catch(IllegalArgumentException ex) {
+                    Method setter;
+                    try {
+                        setter = Anno.forEntity(ClassRef).getSetter(field);
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+
+                    try {
+                        setter.invoke(obj, rs.getObject(colIndex));
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                        return null;
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+                    
                 
                 /*switch (colType) {
                     case Types.VARCHAR:

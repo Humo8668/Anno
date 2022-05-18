@@ -1,12 +1,12 @@
 uz\app\Anno\orm\annotations\Column.class
 uz\app\Anno\Anno$EntityMetaData.class
 uz\app\Anno\orm\annotations\Id.class
-uz\app\Anno\orm\BaseEntity.class
 uz\app\Anno\AnnoContext.class
 uz\app\Anno\orm\annotations\Table.class
 uz\app\Anno\util\ConcurrentSet.class
 uz\app\Anno\service\RouteManager.class
 uz\app\Anno\util\Rgx.class
+uz\app\Anno\orm\IEntity.class
 uz\app\Anno\orm\AnnoNotAnnotatedField.class
 uz\app\Anno\orm\annotations\Schema.class
 uz\app\Anno\util\Pair.class
