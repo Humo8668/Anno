@@ -1,6 +1,9 @@
 package uz.app.Anno;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -109,5 +112,55 @@ public class RepositoryTest {
         assertTrue("User was not deleted!", user == null);
     }
 
+    @Test
+    public void whereClauseTest() throws SQLException, RuntimeException, AnnoException {
+        int adminsCount = userRepo.where("login").like("admin").getCount();
+        assertEquals(adminsCount, 1);
+        User[] users = userRepo.where("login").like("admin").get();
+        User admin = users[0];
+        assertTrue(admin.getId() == 1);
+        assertTrue(admin.getLogin().trim().equals("admin"));
+        assertTrue(admin.getFullName() != null);
+        assertTrue(admin.getPasswordHash() != null);
+        assertTrue(admin.getFullName() != null);
+        assertTrue(admin.getState() != null);
 
+        
+        User user = userRepo.where("login").equal(null).getFirst();
+        assertNull(user);
+
+        long allUsersCount = userRepo.count();
+    }
+
+    @Test
+    public void whereClauseEdgeCases() {
+        User user = null;
+        try {
+            user = userRepo.where("login").less(12).getFirst();
+        } catch(Throwable ex) {
+            assertTrue(ex instanceof SQLException);
+        }
+        
+        try {
+            user = userRepo.where("login").greater("asd").getFirst();
+        } catch (Throwable e) {
+            assertTrue(e instanceof SQLException);
+        }
+
+        try {
+            user = userRepo.where("login").and("state").getFirst();
+        } catch (Throwable e) {
+            assertTrue(e instanceof RuntimeException);
+        }
+        try {
+            user = userRepo.where("login").or("state").getFirst();
+        } catch (Throwable e) {
+            assertTrue(e instanceof RuntimeException);
+        }
+        try {
+            user = userRepo.where("login").getFirst();
+        } catch (Throwable e) {
+            assertTrue(e instanceof RuntimeException);
+        }
+    }
 }

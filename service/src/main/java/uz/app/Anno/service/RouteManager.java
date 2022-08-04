@@ -112,7 +112,7 @@ public class RouteManager {
         Pair<AnnoService, Method> logicMethod;
         if(!RouteMapping.containsKey(routeInfo))
         {
-            System.out.println("Route " + reqPath + " have not been caught by main servlet.");
+            System.out.println("Route "+routeInfo.getValue()+" " + routeInfo.getKey() + " have not been caught by main servlet.");
             res.sendError(404);
             return;
         }
