@@ -11,8 +11,8 @@ public class AnnoPoolConnection implements PoolConnection {
     public static final int DEFAULT_POOL_SIZE = 10;
 
     private String DB_URL, DB_LOGIN, DB_PASSWORD;
-    private int POOL_SIZE;  // Default: 10
-    private int CONN_RETRY_MILLISECONDS;   // Time in milliseconds for delay per connection retry. Default: 50ms
+    private int POOL_SIZE = DEFAULT_POOL_SIZE;  // Default: 10
+    private int CONN_RETRY_MILLISECONDS = DEFAULT_CONNECTION_RETRY_MS;   // Time in milliseconds for delay per connection retry. Default: 50ms
     private boolean IS_AUTO_COMMIT = true;
     private ArrayBlockingQueue<Connection> availConnections = null;
     private ConcurrentSet<Connection> usingConnections = null;
@@ -44,7 +44,7 @@ public class AnnoPoolConnection implements PoolConnection {
         usingConnections = new ConcurrentSet<Connection>();
 
         Connection connection = null;
-        for(int i = 0; i < POOL_SIZE; i++)
+        for(int i = 0; i < this.POOL_SIZE; i++)
         {
             try {
                 connection = this.newConnection();

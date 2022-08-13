@@ -10,6 +10,10 @@ import uz.app.Anno.util.ReflectionUtil;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -19,7 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class RouteManager {
-
+    static Logger log = LoggerFactory.getLogger(RouteManager.class);
     protected static HashMap<Pair<String, HttpMethod>, Pair<AnnoService, Method>> RouteMapping =
             new HashMap<Pair<String, HttpMethod>, Pair<AnnoService, Method>>();
 
@@ -112,7 +116,7 @@ public class RouteManager {
         Pair<AnnoService, Method> logicMethod;
         if(!RouteMapping.containsKey(routeInfo))
         {
-            System.out.println("Route "+routeInfo.getValue()+" " + routeInfo.getKey() + " have not been caught by main servlet.");
+            log.debug("Route "+routeInfo.getValue()+" " + routeInfo.getKey() + " have not been caught by main servlet.");
             res.sendError(404);
             return;
         }

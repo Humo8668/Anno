@@ -3,7 +3,6 @@ package uz.app.Anno;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -15,11 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
-//import org.junit.Ignore;
-import org.junit.runners.MethodSorters;
 
 import uz.app.Anno.orm.OrmContext;
 import uz.app.Anno.orm.Repository;
@@ -129,7 +124,7 @@ public class RepositoryTest {
         User user = userRepo.where("login").equal(null).getFirst();
         assertNull(user);
 
-        long allUsersCount = userRepo.count();
+        userRepo.count();
     }
 
     @Test

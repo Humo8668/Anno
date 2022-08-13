@@ -8,10 +8,15 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 @WebServlet(name="AnnoMainServlet", value = "/*")
 public class MainServlet extends HttpServlet {
+    static Logger log = LoggerFactory.getLogger(MainServlet.class);
 
     public void printASCIIArt() {
         StringBuilder sb = new StringBuilder();
@@ -25,7 +30,12 @@ public class MainServlet extends HttpServlet {
         sb.append( "                                 \n");
         sb.append( "                                 \n");
         
-        System.out.println(sb.toString());
+        try {
+            Class.forName("org.slf4j.impl.StaticLoggerBinder");
+            log.info(sb.toString());
+        } catch (ClassNotFoundException e) {
+            System.out.println(sb.toString());
+        }
     }
 
     @Override
@@ -40,14 +50,14 @@ public class MainServlet extends HttpServlet {
             throw new ServletException(e);
         }
         AnnoEventListener.triggerAfterServicesInitialized();
-        System.out.println("Anno initialized");
+        log.info("Anno initialized");
         AnnoEventListener.triggerAfterAnnoInitialized();
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String method = req.getMethod().trim().toUpperCase();
-        System.out.println(HttpMethod.valueOf(HttpMethod.class, method) + " " + req.getRequestURI());
+        log.debug(HttpMethod.valueOf(HttpMethod.class, method) + " " + req.getRequestURI());
         String requestUri = MainServlet.getRequestURI(req);
         RouteManager.process(requestUri, HttpMethod.valueOf(HttpMethod.class, method), req, resp);
         resp.getWriter().flush();

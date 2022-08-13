@@ -4,7 +4,6 @@ import java.util.Enumeration;
 import javax.servlet.ServletContext;
 
 public class ServiceContext {
-    private static final String SETTING_FILE_URI = "";
     private static final String KEY_DEBUG_MODE = "DEBUG_MODE";
 
     private static boolean isInitialized = false;
