@@ -1,6 +1,5 @@
 package uz.app.Anno;
 
-
 import uz.app.Anno.orm.IEntity;
 import uz.app.Anno.orm.annotations.*;
 import uz.app.Anno.orm.exceptions.ValidationException;

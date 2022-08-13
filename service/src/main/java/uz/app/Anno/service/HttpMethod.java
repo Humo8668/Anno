@@ -1,4 +1,4 @@
-package uz.app.Anno.util;
+package uz.app.Anno.service;
 
 public enum HttpMethod {
     GET,

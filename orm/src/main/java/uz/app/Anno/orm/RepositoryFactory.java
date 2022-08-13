@@ -6,15 +6,21 @@ import uz.app.Anno.orm.exceptions.AnnoException;
 
 public class RepositoryFactory {
 
-    OrmContext context;
+    static OrmContext context = null;
 
-    public RepositoryFactory(OrmContext context) {
-        this.context = context;
+    public static void setContext(OrmContext context) {
+        RepositoryFactory.context = context;
     } 
 
-    public <T extends IEntity> Repository<T> getRepository(Class<T> entityClass) throws SQLException, AnnoException
+    public static OrmContext getContext() {
+        return RepositoryFactory.context;
+    }
+
+    public static <T extends IEntity> Repository<T> getRepository(Class<T> entityClass) throws SQLException, AnnoException
     {
-        Repository<T> repo = new Repository<T>(this.context);
+        if(RepositoryFactory.context == null) 
+            throw new RuntimeException("ORM Context was not set before instantiating repository.");
+        Repository<T> repo = new Repository<T>(RepositoryFactory.context);
         repo.SetTargetEntity(entityClass);
         return repo;
     }

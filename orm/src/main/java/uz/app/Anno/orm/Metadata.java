@@ -251,7 +251,7 @@ public class Metadata {
 
         public String getTableFullName()
         {
-            return getSchemaName("") + ".\"" + getTableName() + "\"";
+            return getSchemaName() + ".\"" + getTableName() + "\"";
         }
 
         public String getTableName()
@@ -259,11 +259,11 @@ public class Metadata {
             return this.ENTITY_CLASS.getAnnotation(Table.class).value();
         }
 
-        public String getSchemaName(String defaultSchema)
+        public String getSchemaName()
         {
             Schema schemaAnno = this.ENTITY_CLASS.getAnnotation(Schema.class);
             if(schemaAnno == null)
-                return defaultSchema;
+                return context.getDatabaseDefaultSchema();
             return schemaAnno.value();
         }
 
@@ -364,7 +364,7 @@ public class Metadata {
 
     public TableMetaData forTable(String tableName)
     {
-        return forTable(tableName, "public");
+        return forTable(tableName, context.getDatabaseDefaultSchema());
     }
 
     public TableMetaData forTable(String tableName, String schemaName)

@@ -1,5 +1,5 @@
-DB_URL=jdbc:postgresql://localhost:5432/postgres
-DB_USER=postgres
-DB_PASSWORD=123
-DB_DEFAULT_SCHEMA=public
-DB_CONN_POOL_SIZE = 10
+uz.app.Anno.orm.DB_URL=jdbc:postgresql://localhost:5432/postgres
+uz.app.Anno.orm.DB_USER=postgres
+uz.app.Anno.orm.DB_PASSWORD=123
+uz.app.Anno.orm.DB_DEFAULT_SCHEMA=public
+uz.app.Anno.orm.DB_CONN_POOL_SIZE = 10

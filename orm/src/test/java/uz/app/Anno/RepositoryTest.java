@@ -25,15 +25,14 @@ import uz.app.Anno.orm.exceptions.ValidationException;
 public class RepositoryTest {
 
     OrmContext context;
-    RepositoryFactory repoFactory;
     Repository<User> userRepo;
     final Integer USER_HUMO_ID = 1;
 
     @Before
     public void setUp() throws FileNotFoundException, IOException, SQLException, AnnoException {
         context = new OrmContext("test.application.context");
-        repoFactory = new RepositoryFactory(context);
-        userRepo = repoFactory.getRepository(User.class);
+        RepositoryFactory.setContext(context);
+        userRepo = RepositoryFactory.getRepository(User.class);
     }
 
     @Test

@@ -41,23 +41,23 @@ public class OrmContext {
     }
 
     private String getDatabaseUrl() {
-        return getProperty("DB_URL");
+        return getProperty("uz.app.Anno.orm.DB_URL");
     }
 
     private String getDatabaseUser() {
-        return getProperty("DB_USER");
+        return getProperty("uz.app.Anno.orm.DB_USER");
     }
 
     private String getDatabasePassword() {
-        return getProperty("DB_PASSWORD");
+        return getProperty("uz.app.Anno.orm.DB_PASSWORD");
     }
 
     public String getDatabaseDefaultSchema() {
-        return getProperty("DB_DEFAULT_SCHEMA");
+        return getProperty("uz.app.Anno.orm.DB_DEFAULT_SCHEMA");
     }
 
     private int getConnectionPoolSize() {
-        String str = getProperty("DB_CONN_POOL_SIZE");
+        String str = getProperty("uz.app.Anno.orm.DB_CONN_POOL_SIZE");
         int connPoolSize = -1;
         try {
             connPoolSize = Integer.parseInt(str);

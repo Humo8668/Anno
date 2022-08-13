@@ -3,7 +3,6 @@ package uz.app.Anno.service;
 import uz.app.Anno.service.annotations.Route;
 import uz.app.Anno.service.annotations.Service;
 import uz.app.Anno.service.exceptions.WrongUsageException;
-import uz.app.Anno.util.HttpMethod;
 import uz.app.Anno.util.Pair;
 import uz.app.Anno.util.ReflectionUtil;
 

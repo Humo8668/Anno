@@ -12,7 +12,7 @@
 
 <h1>AnnoFramework</h1>
 
-Includes ORM functionality for PostgreSQL DBMS and easy url-mapping instead of Servlets(one servlet per one path). 
+Includes ORM functionality for PostgreSQL DBMS (<a href="/orm">ORM-module</a>) and easy url-mapping service (<a href="/service">Service-module</a>) instead of Servlets(one servlet per one path). 
 
 Requirements: 
 <ul>
@@ -20,26 +20,27 @@ Requirements:
 <li>Tomcat 7 or newer, the webapp's web.xml has to be declared conform Servlet 3.0 spec in order to get Tomcat to scan and process the annotations.
     <code>@WebServlet</code> annotation is used in framework.
 </li>
-<li>If you want to use ORM, then load some Postgres JDBC-driver class in constructor of your service. (Your services load firstly)</li>
-<li>Depends on https://github.com/Humo8668/AnnoDBC</li>
+<li>If you want to use ORM, then load some Postgres JDBC-driver class</li>
 </ul>
 
 <h2>Usage</h2>
 Minimap:
 <ul>
-    <li><a href="#services"> Url-mapping services</a></li>
+    <li><a href="#service"> Url-mapping Services</a></li>
     <li><a href="#orm"> ORM</a></li>
 </ul>
 
-<h3 name="service">Services</h3>
+<h3 name="service">Service</h3>
 Sample of Service (url-mapping): <br>
-Create some class extending <code>BaseService</code>. Declare default constructor without arguments. <br>
-And then declare some method with arguments <code> HttpServletRequest req, HttpServletResponse res</code> in this order. <br>
+Create some class extending <code>AnnoService</code> abstract class. Declare default constructor without arguments so Anno-framework could instantiate your service object. <br>
+Then declare some method with arguments <code> HttpServletRequest req, HttpServletResponse res</code> in order given here. <br>
 The method may return <code>void</code>, doesn't have sense. <br>
 Annotate the method with <code>@Route</code> in which pass the route, corresponding to this method throught <code>value</code> and http-method throught <code>method</code>.<br>
 By default http-method is <code>GET</code> mtehod.
 
 <pre><code>
+package uz.app.Anno.test;
+
 import javax.servlet.http.*;
 
 import java.io.IOException;
@@ -47,13 +48,12 @@ import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 
-import uz.app.Anno.orm.*;
-import uz.app.Anno.service.BaseService;
+import uz.app.Anno.service.AnnoService;
+import uz.app.Anno.service.annotations.Route;
 import uz.app.Anno.util.HttpMethod;
 
-public class EchoService extends BaseService {
-
-    public EchoService(){}
+public class EchoService extends AnnoService {
+    
 
     @Route(value = "/echo", method = HttpMethod.GET)
     void getAll(HttpServletRequest req, HttpServletResponse res)
@@ -62,10 +62,11 @@ public class EchoService extends BaseService {
         PrintWriter out = res.getWriter();
         res.setContentType("application/json");
         res.setStatus(200);
-        out.print("{\"message\": \"ECHO... echo... echo...\"");
+        out.print("{\"message\": \"ECHO... echo... echo...\" }");
         return;
     }
 }
+
 </code></pre><br>
 If you send Http-request <code>GET /echo </code>, you will get json-response: <br>
 <pre><code>
@@ -78,10 +79,7 @@ All the values printed to <code> out </code> stream will be responsed to client.
 Also you can annotate service class. This will help you group bunch of routes into one prefixed route:
 <pre><code>
 @Service("sample")
-public class EchoService extends BaseService {
-
-    public EchoService(){}
-
+public class EchoService extends AnnoService {
     @Route(value = "/echo", method = HttpMethod.GET)
     void getAll(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException
@@ -89,7 +87,7 @@ public class EchoService extends BaseService {
         PrintWriter out = res.getWriter();
         res.setContentType("application/json");
         res.setStatus(200);
-        out.print("{\"message\": \"ECHO... echo... echo...\"");
+        out.print("{\"message\": \"ECHO... echo... echo...\" }");
         return;
     }
 }
@@ -103,35 +101,19 @@ If you send Http-request <code>GET /sample/echo </code>, you will get json-respo
 
 <h3 name="orm">ORM</h3>
 
-Database connection parameters will be set throught context parameters in <code>web.xml</code> file:
-
-<pre><code>
-&lt;context-param&gt;
-    &lt;param-name&gt;DB_USERNAME&lt;/param-name&gt;
-    &lt;param-value&gt;postgres&lt;/param-value&gt;
-&lt;/context-param&gt;
-&lt;context-param&gt;
-    &lt;param-name&gt;DB_PASSWORD&lt;/param-name&gt;
-    &lt;param-value&gt;123&lt;/param-value&gt;
-&lt;/context-param&gt;
-&lt;context-param&gt;
-    &lt;param-name&gt;DB_URL&lt;/param-name&gt;
-    &lt;param-value&gt;jdbc:postgresql://localhost:5432/postgres&lt;/param-value&gt;
-&lt;/context-param&gt;
-&lt;context-param&gt;
-    &lt;param-name&gt;DB_CONN_POOL_SIZE&lt;/param-name&gt;
-    &lt;param-value&gt;5&lt;/param-value&gt;
-&lt;/context-param&gt;
-</code></pre>
-
+First, you should create all entities to which data will be mapped:
 Sample of <b>entity</b> binded to table by annotations:<br>
 <pre><code>
-import uz.app.Anno.orm.*;
-import uz.app.Anno.util.*;
+package uz.app.Anno;
+
+import uz.app.Anno.orm.IEntity;
+import uz.app.Anno.orm.annotations.*;
+import uz.app.Anno.orm.exceptions.ValidationException;
+import uz.app.Anno.util.Rgx;
 
 @Schema("public")
 @Table("Users")
-public class User extends BaseEntity {
+public class User implements IEntity {
     @Id
     @Generated
     @Column("id")
@@ -147,6 +129,8 @@ public class User extends BaseEntity {
     @Column("state")
     private String state;
 
+    private String age;
+
     public User() { }
 
     public User(int id, String login, String fullName, String email, String passwordHash, String state) {
@@ -160,28 +144,114 @@ public class User extends BaseEntity {
 
     @Override
     public boolean isValid() {
-        // your validation logic
+        if(!Rgx.isEmail(this.email))
+            return false;
+
+        if(this.fullName == null || this.fullName.length() == 0)
+            return false;
+
+        if(this.login == null || this.login.length() == 0)
+            return false;
+
+        if(this.passwordHash == null || this.passwordHash.length() == 0)
+            return false;
+
+        if(this.state == null || this.state.length() == 0)
+            this.state = "A";
+
         return true;
     }
 
     @Override
-    public void validate() throws AnnoValidationException {
-        // your validation logic
-        return;
+    public void validate() throws ValidationException {
+        if(!Rgx.isEmail(this.email))
+            throw new ValidationException("Invalid email", "email");
+
+        if(this.fullName == null || this.fullName.length() == 0)
+            throw new ValidationException("Invalid full name: empty", "fullName");
+
+        if(this.login == null || this.login.length() == 0)
+            throw new ValidationException("Invalid login: empty", "login");
+
+        if(this.passwordHash == null || this.passwordHash.length() == 0)
+            throw new ValidationException("Invalid password hash: empty", "passwordHash");
+
+        if(this.state == null || this.state.length() == 0)
+            this.state = "A";
+    }
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
 </code></pre>
 
 All operations on entities are performed throught <b>Repositories</b>.<br>
-Each entity should have their repository. There's sample of repository class: <br>
+<b>Repositories</b> are instantiated through static class <code>RepositoryFactory</code>.<br>
+<code>RepositoryFactory</code> must have context <code>OrmContext</code>.<br>
+<code>OrmContext</code> can be instantiated by constructor with one argument, consuming the string URI of config file.
+
+Sample:
 <pre><code>
-public class UserRepository extends Repository<User> {
-    public UserRepository() throws Exception{
-        /*ATTENTION! Do not remove it. 
-        This is necessary due to specification of java regarding generic types*/
-        SetTargetEntity(User.class);
-    }
-}
+OrmContext context = new OrmContext("test.application.context");
+RepositoryFactory.setContext(context);
+userRepo = RepositoryFactory.getRepository(User.class);
+</code></pre>
+
+Configuration file sample:
+
+<b>test.application.context</b>:
+<pre><code>
+uz.app.Anno.orm.DB_URL=jdbc:postgresql://localhost:5432/postgres
+uz.app.Anno.orm.DB_USER=postgres
+uz.app.Anno.orm.DB_PASSWORD=123
+uz.app.Anno.orm.DB_DEFAULT_SCHEMA=public
+uz.app.Anno.orm.DB_CONN_POOL_SIZE = 10
 </code></pre>
 
 <h4>Examples of using repositories:</h4>

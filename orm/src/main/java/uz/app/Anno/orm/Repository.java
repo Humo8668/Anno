@@ -79,7 +79,7 @@ public class Repository<T extends IEntity> {
         if(this.idField == null)
             throw new NullPointerException("Id field must be indicated for entity class <" + ClassRef.getName() + ">");
 
-        this.SCHEMA_NAME = metadata.forEntity(ClassRef).getSchemaName(context.getDatabaseDefaultSchema());
+        this.SCHEMA_NAME = metadata.forEntity(ClassRef).getSchemaName();
         this.TABLE_NAME = metadata.forEntity(ClassRef).getTableName();
         entityFields = metadata.forEntity(ClassRef).getAllFields();
         entityColumns = metadata.forEntity(ClassRef).getColumnAnnotatedFields();
